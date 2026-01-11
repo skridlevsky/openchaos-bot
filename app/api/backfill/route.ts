@@ -33,10 +33,16 @@ export async function POST(req: NextRequest) {
     const installations = await listInstallations();
     const installation = installations.find(i => i.account?.login === owner);
     if (!installation) {
-      return NextResponse.json({ error: "Bot not installed on repo" }, { status: 400 });
+      return NextResponse.json({
+        error: "Bot not installed on repo",
+        debug: { owner, installationsFound: installations.map(i => i.account?.login) }
+      }, { status: 400 });
     }
 
     const octokit = await getOctokit(installation.id);
+    if (!octokit?.rest?.pulls) {
+      return NextResponse.json({ error: "Octokit not initialized properly", debug: { hasOctokit: !!octokit, hasRest: !!octokit?.rest } }, { status: 500 });
+    }
     const prs = await getOpenPRs(octokit, owner, repo);
 
     const results: { pr: number; status: string }[] = [];

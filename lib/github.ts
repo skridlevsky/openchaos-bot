@@ -1,4 +1,4 @@
-import { App } from "@octokit/app";
+import { App, Octokit } from "octokit";
 import crypto from "crypto";
 
 export interface PullRequest {
@@ -14,7 +14,7 @@ interface Comment {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Octokit = any;
+type OctokitInstance = any;
 
 let _app: App | null = null;
 
@@ -32,7 +32,7 @@ function getApp(): App {
       privateKey = privateKey.replace(/\\n/g, "\n");
     }
 
-    _app = new App({ appId, privateKey });
+    _app = new App({ appId, privateKey, Octokit });
   }
   return _app;
 }
@@ -46,11 +46,11 @@ export async function verifyWebhookSignature(payload: string, signature: string)
   return crypto.timingSafeEqual(expectedBuf, signatureBuf);
 }
 
-export async function getOctokit(installationId: number): Promise<Octokit> {
+export async function getOctokit(installationId: number): Promise<OctokitInstance> {
   return getApp().getInstallationOctokit(installationId);
 }
 
-export async function getPRDiff(octokit: Octokit, owner: string, repo: string, prNumber: number): Promise<string> {
+export async function getPRDiff(octokit: OctokitInstance, owner: string, repo: string, prNumber: number): Promise<string> {
   const { data } = await octokit.rest.pulls.get({
     owner, repo, pull_number: prNumber,
     mediaType: { format: "diff" },
@@ -58,17 +58,17 @@ export async function getPRDiff(octokit: Octokit, owner: string, repo: string, p
   return data as unknown as string;
 }
 
-export async function getOpenPRs(octokit: Octokit, owner: string, repo: string): Promise<PullRequest[]> {
+export async function getOpenPRs(octokit: OctokitInstance, owner: string, repo: string): Promise<PullRequest[]> {
   const { data } = await octokit.rest.pulls.list({ owner, repo, state: "open" });
   return data;
 }
 
-export async function getPRComments(octokit: Octokit, owner: string, repo: string, prNumber: number): Promise<Comment[]> {
+export async function getPRComments(octokit: OctokitInstance, owner: string, repo: string, prNumber: number): Promise<Comment[]> {
   const { data } = await octokit.rest.issues.listComments({ owner, repo, issue_number: prNumber });
   return data;
 }
 
-export async function postComment(octokit: Octokit, owner: string, repo: string, prNumber: number, body: string): Promise<void> {
+export async function postComment(octokit: OctokitInstance, owner: string, repo: string, prNumber: number, body: string): Promise<void> {
   await octokit.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
 }
 
@@ -77,7 +77,7 @@ export async function listInstallations() {
   return data;
 }
 
-export async function getCIStatus(octokit: Octokit, owner: string, repo: string, sha: string): Promise<"success" | "failure" | "pending"> {
+export async function getCIStatus(octokit: OctokitInstance, owner: string, repo: string, sha: string): Promise<"success" | "failure" | "pending"> {
   const { data } = await octokit.rest.repos.getCombinedStatusForRef({ owner, repo, ref: sha });
   if (data.state === "failure" || data.state === "error") return "failure";
   if (data.state === "success") return "success";
