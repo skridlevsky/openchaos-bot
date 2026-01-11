@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOctokit, getOpenPRs, getPRComments, listInstallations } from "@/lib/github";
-import { reviewPR } from "@/lib/review";
+import { getOctokit, getOpenPRs, getPRComments, listInstallations } from "../../../lib/github";
+import { reviewPR } from "../../../lib/review";
 
 const DELAY_MS = 5000;
 

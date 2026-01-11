@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyWebhookSignature, getOctokit } from "@/lib/github";
-import { reviewPR, checkRateLimit } from "@/lib/review";
+import { verifyWebhookSignature, getOctokit } from "../../../lib/github";
+import { reviewPR, checkRateLimit } from "../../../lib/review";
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
