@@ -40,6 +40,13 @@ export async function reviewPR(octokit: any, owner: string, repo: string, pr: Pu
   if (truncated) diff = lines.slice(0, MAX_DIFF_LINES).join("\n");
 
   const summary = await generateSummary(diff, truncated);
+
+  // Don't post comment if summary generation failed
+  if (!summary) {
+    console.error(`Failed to generate summary for PR #${pr.number}`);
+    return false;
+  }
+
   const [summaryLine, filesLine, impactLine] = summary.split("\n").filter(l => l.trim());
 
   const comment = `🤖 **OpenChaos Bot**
