@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("../github", () => ({
   getPRDiff: vi.fn(),
   postComment: vi.fn(),
+  getCIStatus: vi.fn(),
   PullRequest: {},
 }));
 
@@ -11,22 +12,9 @@ vi.mock("../openrouter", () => ({
   generateSummary: vi.fn(),
 }));
 
-import { checkRateLimit, reviewPR } from "../review";
+import { reviewPR } from "../review";
 import { getPRDiff, postComment } from "../github";
 import { generateSummary } from "../openrouter";
-
-describe("checkRateLimit", () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-    // Reset module state by re-importing (rate limit map is module-scoped)
-    vi.resetModules();
-  });
-
-  it("returns true when under limit", async () => {
-    const { checkRateLimit } = await import("../review");
-    expect(checkRateLimit()).toBe(true);
-  });
-});
 
 describe("reviewPR", () => {
   const mockOctokit = {};
@@ -95,5 +83,22 @@ describe("reviewPR", () => {
 
     const comment = vi.mocked(postComment).mock.calls[0][4];
     expect(comment).toContain("OpenChaos Bot");
+  });
+
+  it("returns false and skips comment when summary generation fails", async () => {
+    vi.mocked(getPRDiff).mockResolvedValue("diff content");
+    vi.mocked(generateSummary).mockResolvedValue(null);
+
+    const result = await reviewPR(mockOctokit, "owner", "repo", mockPR);
+
+    expect(result).toBe(false);
+    expect(postComment).not.toHaveBeenCalled();
+  });
+
+  it("returns false for draft PR", async () => {
+    const draftPR = { ...mockPR, draft: true };
+    const result = await reviewPR(mockOctokit, "owner", "repo", draftPR);
+    expect(result).toBe(false);
+    expect(getPRDiff).not.toHaveBeenCalled();
   });
 });

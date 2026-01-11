@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature, getOctokit } from "../../../lib/github";
-import { reviewPR, checkRateLimit } from "../../../lib/review";
+import { reviewPR } from "../../../lib/review";
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
@@ -15,18 +15,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: "Not a PR event" });
   }
 
-  const data = JSON.parse(payload);
+  let data;
+  try {
+    data = JSON.parse(payload);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
+
   if (data.action !== "opened" && data.action !== "ready_for_review") {
     return NextResponse.json({ ok: true, skipped: "Not PR opened or ready_for_review" });
   }
 
   const pr = data.pull_request;
-  if (!checkRateLimit()) {
-    return NextResponse.json({ error: "Rate limited" }, { status: 429 });
+  const installationId = data.installation?.id;
+  const repoOwner = data.repository?.owner?.login;
+  const repoName = data.repository?.name;
+
+  if (!pr || !installationId || !repoOwner || !repoName) {
+    return NextResponse.json({ error: "Missing required fields in payload" }, { status: 400 });
   }
 
-  const octokit = await getOctokit(data.installation.id);
-  const reviewed = await reviewPR(octokit, data.repository.owner.login, data.repository.name, pr);
+  const octokit = await getOctokit(installationId);
+  const reviewed = await reviewPR(octokit, repoOwner, repoName, pr);
 
   return NextResponse.json({ ok: true, reviewed });
 }

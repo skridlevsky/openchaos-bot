@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOctokit, getOpenPRs, getPRComments, listInstallations, PullRequest } from "../../../lib/github";
-import { reviewPR, checkRateLimit } from "../../../lib/review";
+import { reviewPR } from "../../../lib/review";
 
 // Vercel Pro allows up to 60 seconds
 export const maxDuration = 60;
@@ -109,16 +109,6 @@ export async function POST(req: NextRequest) {
           timeMs: Date.now() - startTime,
         },
       });
-    }
-
-    // Check rate limit before processing
-    if (!checkRateLimit()) {
-      return NextResponse.json({
-        ok: false,
-        error: "Rate limited (20/hour). Try again later.",
-        results,
-        needsProcessing: toProcess.length,
-      }, { status: 429 });
     }
 
     // Process eligible PRs in parallel batches with error handling

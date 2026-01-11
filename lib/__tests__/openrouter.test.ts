@@ -19,6 +19,7 @@ describe("generateSummary", () => {
     };
 
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve(mockResponse)
     }));
 
@@ -33,6 +34,7 @@ describe("generateSummary", () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation((url, options) => {
       capturedBody = options.body;
       return Promise.resolve({
+        ok: true,
         json: () => Promise.resolve({ choices: [{ message: { content: "test" } }] })
       });
     }));
@@ -41,21 +43,23 @@ describe("generateSummary", () => {
     expect(capturedBody).toContain("NOTE: This is a large PR");
   });
 
-  it("returns fallback on empty response", async () => {
+  it("returns null on empty response", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ choices: [] })
     }));
 
     const result = await generateSummary("diff", false);
-    expect(result).toBe("Unable to generate summary");
+    expect(result).toBeNull();
   });
 
-  it("returns fallback on missing content", async () => {
+  it("returns null on missing content", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ choices: [{ message: {} }] })
     }));
 
     const result = await generateSummary("diff", false);
-    expect(result).toBe("Unable to generate summary");
+    expect(result).toBeNull();
   });
 });
