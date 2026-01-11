@@ -29,7 +29,10 @@ function getApp(): App {
 export async function verifyWebhookSignature(payload: string, signature: string): Promise<boolean> {
   const expected = "sha256=" + crypto.createHmac("sha256", process.env.GITHUB_WEBHOOK_SECRET!)
     .update(payload).digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  const expectedBuf = Buffer.from(expected);
+  const signatureBuf = Buffer.from(signature);
+  if (expectedBuf.length !== signatureBuf.length) return false;
+  return crypto.timingSafeEqual(expectedBuf, signatureBuf);
 }
 
 export async function getOctokit(installationId: number): Promise<Octokit> {
