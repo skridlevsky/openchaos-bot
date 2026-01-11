@@ -1,4 +1,4 @@
-import { getPRDiff, postComment, PullRequest } from "./github";
+import { getPRDiff, postComment, getCIStatus, PullRequest } from "./github";
 import { generateSummary } from "./openrouter";
 
 export type { PullRequest };
@@ -29,6 +29,10 @@ export async function reviewPR(octokit: any, owner: string, repo: string, pr: Pu
   if (pr.state === "closed") return false;
   if (pr.draft) return false;
   if (pr.changed_files === 0) return false;
+  if (pr.head?.sha) {
+    const ciStatus = await getCIStatus(octokit, owner, repo, pr.head.sha);
+    if (ciStatus === "failure") return false;
+  }
 
   let diff = await getPRDiff(octokit, owner, repo, pr.number);
   const lines = diff.split("\n");

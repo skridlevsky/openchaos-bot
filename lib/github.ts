@@ -6,6 +6,7 @@ export interface PullRequest {
   state: string;
   changed_files: number;
   draft?: boolean;
+  head?: { sha: string };
 }
 
 interface Comment {
@@ -65,4 +66,11 @@ export async function postComment(octokit: Octokit, owner: string, repo: string,
 export async function listInstallations() {
   const { data } = await getApp().octokit.request("GET /app/installations");
   return data;
+}
+
+export async function getCIStatus(octokit: Octokit, owner: string, repo: string, sha: string): Promise<"success" | "failure" | "pending"> {
+  const { data } = await octokit.rest.repos.getCombinedStatusForRef({ owner, repo, ref: sha });
+  if (data.state === "failure" || data.state === "error") return "failure";
+  if (data.state === "success") return "success";
+  return "pending";
 }
