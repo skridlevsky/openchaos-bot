@@ -20,9 +20,14 @@ let _app: App | null = null;
 
 function getApp(): App {
   if (!_app) {
+    // Handle both escaped \n and actual newlines in private key
+    let privateKey = process.env.GITHUB_PRIVATE_KEY!;
+    if (privateKey.includes("\\n")) {
+      privateKey = privateKey.replace(/\\n/g, "\n");
+    }
     _app = new App({
       appId: process.env.GITHUB_APP_ID!,
-      privateKey: process.env.GITHUB_PRIVATE_KEY!.replace(/\\n/g, "\n"),
+      privateKey,
     });
   }
   return _app;
