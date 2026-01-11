@@ -94,7 +94,7 @@ curl -X POST https://your-app.vercel.app/api/backfill \
 |------|-----|
 | Max 20 reviews/hour | Prevent spam |
 | Skip PRs with 0 files | No empty PRs |
-| Skip failed CI | Spam PRs fail CI |
+| Skip draft PRs | Wait until ready for review |
 | Truncate diffs > 500 lines | LLM context limits |
 
 ---

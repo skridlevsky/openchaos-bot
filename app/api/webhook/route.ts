@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
   }
 
   const data = JSON.parse(payload);
-  if (data.action !== "opened") {
-    return NextResponse.json({ ok: true, skipped: "Not PR opened" });
+  if (data.action !== "opened" && data.action !== "ready_for_review") {
+    return NextResponse.json({ ok: true, skipped: "Not PR opened or ready_for_review" });
   }
 
   const pr = data.pull_request;

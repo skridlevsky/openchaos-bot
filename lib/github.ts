@@ -5,6 +5,7 @@ export interface PullRequest {
   number: number;
   state: string;
   changed_files: number;
+  draft?: boolean;
 }
 
 interface Comment {

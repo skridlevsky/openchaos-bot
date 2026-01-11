@@ -27,6 +27,7 @@ function incrementRateLimit() {
 export async function reviewPR(octokit: any, owner: string, repo: string, pr: PullRequest): Promise<boolean> {
   if (!checkRateLimit()) return false;
   if (pr.state === "closed") return false;
+  if (pr.draft) return false;
   if (pr.changed_files === 0) return false;
 
   let diff = await getPRDiff(octokit, owner, repo, pr.number);
