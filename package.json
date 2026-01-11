@@ -10,12 +10,15 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@octokit/app": "^15.0.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@octokit/app": "^15.0.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@types/node": "^25.0.6",
+    "@types/react": "^19.2.8",
+    "typescript": "^5.9.3",
     "vitest": "^3.0.0"
   }
 }
