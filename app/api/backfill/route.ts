@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getOctokit, getOpenPRs, getPRComments, listInstallations } from "@/lib/github";
 import { reviewPR } from "@/lib/review";
 
-const OWNER = "skridlevsky";
-const REPO = "openchaos";
 const DELAY_MS = 5000;
 
 export async function POST(req: NextRequest) {
@@ -14,15 +12,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const owner = process.env.GITHUB_OWNER;
+  const repo = process.env.GITHUB_REPO;
+  if (!owner || !repo) {
+    return NextResponse.json({ error: "GITHUB_OWNER and GITHUB_REPO must be set" }, { status: 500 });
+  }
+
   // Get installation for the repo
   const installations = await listInstallations();
-  const installation = installations.find(i => i.account?.login === OWNER);
+  const installation = installations.find(i => i.account?.login === owner);
   if (!installation) {
     return NextResponse.json({ error: "Bot not installed on repo" }, { status: 400 });
   }
 
   const octokit = await getOctokit(installation.id);
-  const prs = await getOpenPRs(octokit, OWNER, REPO);
+  const prs = await getOpenPRs(octokit, owner, repo);
 
   const results: { pr: number; status: string }[] = [];
 
@@ -32,14 +36,14 @@ export async function POST(req: NextRequest) {
       continue;
     }
 
-    const comments = await getPRComments(octokit, OWNER, REPO, pr.number);
+    const comments = await getPRComments(octokit, owner, repo, pr.number);
     const alreadyCommented = comments.some(c => c.body?.includes("OpenChaos Bot"));
     if (alreadyCommented) {
       results.push({ pr: pr.number, status: "skipped: already commented" });
       continue;
     }
 
-    const reviewed = await reviewPR(octokit, OWNER, REPO, pr);
+    const reviewed = await reviewPR(octokit, owner, repo, pr);
     results.push({ pr: pr.number, status: reviewed ? "reviewed" : "skipped" });
 
     if (reviewed) await new Promise(r => setTimeout(r, DELAY_MS));

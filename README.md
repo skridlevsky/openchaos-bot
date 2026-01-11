@@ -62,6 +62,8 @@ GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE K
 GITHUB_WEBHOOK_SECRET=your_webhook_secret
 OPENROUTER_API_KEY=your_openrouter_key
 BACKFILL_SECRET=your_backfill_secret
+GITHUB_OWNER=your_github_username       # For backfill endpoint
+GITHUB_REPO=your_repo_name              # For backfill endpoint
 ```
 
 > **Note:** For the private key, replace newlines with `\n` or use Vercel's multiline value support.
