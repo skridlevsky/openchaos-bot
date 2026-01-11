@@ -20,15 +20,19 @@ let _app: App | null = null;
 
 function getApp(): App {
   if (!_app) {
+    const appId = process.env.GITHUB_APP_ID;
+    const privateKeyRaw = process.env.GITHUB_PRIVATE_KEY;
+
+    if (!appId) throw new Error("GITHUB_APP_ID is not set");
+    if (!privateKeyRaw) throw new Error("GITHUB_PRIVATE_KEY is not set");
+
     // Handle both escaped \n and actual newlines in private key
-    let privateKey = process.env.GITHUB_PRIVATE_KEY!;
+    let privateKey = privateKeyRaw;
     if (privateKey.includes("\\n")) {
       privateKey = privateKey.replace(/\\n/g, "\n");
     }
-    _app = new App({
-      appId: process.env.GITHUB_APP_ID!,
-      privateKey,
-    });
+
+    _app = new App({ appId, privateKey });
   }
   return _app;
 }
