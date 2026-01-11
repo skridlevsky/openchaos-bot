@@ -1,7 +1,9 @@
 const MODEL = "google/gemini-2.0-flash-exp:free";
 
 export async function generateSummary(diff: string, truncated: boolean): Promise<string> {
-  const prompt = `Analyze this PR diff and provide a brief summary.
+  const prompt = `You are reviewing a PR for OpenChaos - a repo where the internet votes on which PRs get merged. It's a democracy-driven open source experiment.
+
+Analyze this PR diff and provide a brief summary.
 ${truncated ? "NOTE: This is a large PR, diff was truncated.\n" : ""}
 Respond in this exact format (no markdown, just plain text):
 SUMMARY: [1-2 sentences of what the PR does]
