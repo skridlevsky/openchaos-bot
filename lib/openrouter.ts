@@ -1,4 +1,5 @@
-const MODEL = "google/gemini-2.0-flash-exp:free";
+// Using paid model - free tier (:free suffix) hits rate limits quickly
+const MODEL = "google/gemini-2.0-flash-001";
 
 export async function generateSummary(diff: string, truncated: boolean): Promise<string | null> {
   const prompt = `You are reviewing a PR for OpenChaos - a repo where the internet votes on which PRs get merged. It's a democracy-driven open source experiment.
