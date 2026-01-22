@@ -28,7 +28,7 @@ export async function reviewPR(octokit: any, owner: string, repo: string, pr: Pu
     return false;
   }
 
-  const [summaryLine, filesLine, impactLine] = summary.split("\n").filter(l => l.trim());
+  const [summaryLine, filesLine, vibeLine] = summary.split("\n").filter(l => l.trim());
 
   const comment = `🤖 **OpenChaos Bot**
 
@@ -36,7 +36,7 @@ export async function reviewPR(octokit: any, owner: string, repo: string, pr: Pu
 
 **Files changed:** ${filesLine?.replace(/^FILES:\s*/i, "") || `${pr.changed_files}`}
 
-**Impact:** ${impactLine?.replace(/^IMPACT:\s*/i, "") || "Unknown"}
+**Vibe:** ${vibeLine?.replace(/^VIBE:\s*/i, "") || "Unknown"}
 ${truncated ? "\n⚠️ *Large PR - partial review*" : ""}
 ---
 *[openchaos-bot](https://github.com/skridlevsky/openchaos-bot)*`;

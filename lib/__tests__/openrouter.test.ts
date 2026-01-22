@@ -13,7 +13,7 @@ describe("generateSummary", () => {
     const mockResponse = {
       choices: [{
         message: {
-          content: "SUMMARY: Added login feature\nFILES: 2 (auth.ts, login.tsx)\nIMPACT: Medium - Adds authentication"
+          content: "SUMMARY: Added login feature\nFILES: 2 (auth.ts, login.tsx)\nVIBE: Suspiciously reasonable for this repo"
         }
       }]
     };
@@ -26,7 +26,7 @@ describe("generateSummary", () => {
     const result = await generateSummary("diff content", false);
     expect(result).toContain("SUMMARY:");
     expect(result).toContain("FILES:");
-    expect(result).toContain("IMPACT:");
+    expect(result).toContain("VIBE:");
   });
 
   it("includes truncation note in prompt when truncated", async () => {

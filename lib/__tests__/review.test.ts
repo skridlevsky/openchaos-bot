@@ -41,7 +41,7 @@ describe("reviewPR", () => {
   it("fetches diff, generates summary, and posts comment", async () => {
     vi.mocked(getPRDiff).mockResolvedValue("line1\nline2\nline3");
     vi.mocked(generateSummary).mockResolvedValue(
-      "SUMMARY: Test summary\nFILES: 3 (a.ts, b.ts)\nIMPACT: Low - Minor change"
+      "SUMMARY: Test summary\nFILES: 3 (a.ts, b.ts)\nVIBE: Suspiciously reasonable"
     );
     vi.mocked(postComment).mockResolvedValue(undefined);
 
@@ -60,7 +60,7 @@ describe("reviewPR", () => {
   it("truncates large diffs and sets truncated flag", async () => {
     const largeDiff = Array(600).fill("line").join("\n");
     vi.mocked(getPRDiff).mockResolvedValue(largeDiff);
-    vi.mocked(generateSummary).mockResolvedValue("SUMMARY: Big\nFILES: 10\nIMPACT: High");
+    vi.mocked(generateSummary).mockResolvedValue("SUMMARY: Big\nFILES: 10\nVIBE: Pure chaos energy");
     vi.mocked(postComment).mockResolvedValue(undefined);
 
     await reviewPR(mockOctokit, "owner", "repo", mockPR);

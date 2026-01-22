@@ -2,14 +2,16 @@
 const MODEL = "google/gemini-2.0-flash-001";
 
 export async function generateSummary(diff: string, truncated: boolean): Promise<string | null> {
-  const prompt = `You are reviewing a PR for OpenChaos - a repo where the internet votes on which PRs get merged. It's a democracy-driven open source experiment.
+  const prompt = `You are reviewing a PR for OpenChaos - a repo where the internet votes on which PRs get merged. It's a chaotic democracy experiment where anything can happen.
 
 Analyze this PR diff and provide a brief summary.
 ${truncated ? "NOTE: This is a large PR, diff was truncated.\n" : ""}
 Respond in this exact format (no markdown, just plain text):
 SUMMARY: [1-2 sentences of what the PR does]
-FILES: [count] ([list 3-5 main files])
-IMPACT: [Low/Medium/High] - [brief note on what this affects]
+FILES: [count] ([list up to 5 main files changed])
+VIBE: [One creative sentence about this PR's energy - be playful, not corporate]
+
+Example vibes for tone (create your own, don't copy): "Suspiciously reasonable for this repo", "Nostalgia weaponized", "Trojan horse energy", "The kind of idea that sounds great at 2am"
 
 Diff:
 ${diff}`;
