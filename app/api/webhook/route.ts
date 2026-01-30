@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature, getOctokit } from "../../../lib/github";
 import { reviewPR } from "../../../lib/review";
+import { notifyMerge } from "../../../lib/discord";
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
@@ -22,10 +23,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
   }
 
-  if (data.action !== "opened" && data.action !== "ready_for_review") {
-    return NextResponse.json({ ok: true, skipped: "Not PR opened or ready_for_review" });
-  }
-
   const pr = data.pull_request;
   const installationId = data.installation?.id;
   const repoOwner = data.repository?.owner?.login;
@@ -33,6 +30,28 @@ export async function POST(req: NextRequest) {
 
   if (!pr || !installationId || !repoOwner || !repoName) {
     return NextResponse.json({ error: "Missing required fields in payload" }, { status: 400 });
+  }
+
+  // PR merged — notify Discord
+  if (data.action === "closed" && pr.merged) {
+    const notified = await notifyMerge({
+      number: pr.number,
+      title: pr.title,
+      author: pr.user?.login || "unknown",
+      authorUrl: pr.user?.html_url || `https://github.com/${pr.user?.login}`,
+      authorAvatar: pr.user?.avatar_url || "",
+      url: pr.html_url,
+      additions: pr.additions || 0,
+      deletions: pr.deletions || 0,
+      changedFiles: pr.changed_files || 0,
+      repo: repoName,
+    });
+    return NextResponse.json({ ok: true, notified });
+  }
+
+  // PR opened/ready — generate review
+  if (data.action !== "opened" && data.action !== "ready_for_review") {
+    return NextResponse.json({ ok: true, skipped: "Not a handled action" });
   }
 
   const octokit = await getOctokit(installationId);
